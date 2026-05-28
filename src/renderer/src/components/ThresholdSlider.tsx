@@ -1,41 +1,76 @@
-import React from 'react';
-import { useAppStore } from '../store/useAppStore';
-import { Info } from 'lucide-react';
+import React from 'react'
+import { useAppStore } from '../store/useAppStore'
+import { Sliders } from 'lucide-react'
 
 export const ThresholdSlider: React.FC = () => {
-  const { similarityThreshold, setSimilarityThreshold } = useAppStore();
+  const { similarityThreshold, setSimilarityThreshold } = useAppStore()
+
+  const pct = (similarityThreshold / 20) * 100
+
+  const modeLabel =
+    similarityThreshold === 0  ? 'Exact duplicates only'         :
+    similarityThreshold <= 4   ? 'High precision'                :
+    similarityThreshold <= 9   ? 'Balanced (recommended)'        :
+    similarityThreshold <= 14  ? 'Moderate — catches more'       :
+    'Loose — may catch non-duplicates'
+
+  const modeColor =
+    similarityThreshold === 0  ? 'text-emerald-400' :
+    similarityThreshold <= 4   ? 'text-cyan-400'    :
+    similarityThreshold <= 9   ? 'text-violet-400'  :
+    similarityThreshold <= 14  ? 'text-amber-400'   :
+    'text-rose-400'
 
   return (
-    <div className="w-full max-w-md mx-auto mt-6 card-glass p-4 rounded-xl">
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-text-primary flex items-center gap-2">
-          Similarity Sensitivity
-          <div className="group relative">
-            <Info className="w-4 h-4 text-text-secondary hover:text-accent-cyan cursor-help transition-colors" />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 card-glass text-xs text-text-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl z-20">
-              Higher value means looser matching (finds more "similar" images that might be different). Lower value requires images to be more identical.
-            </div>
-          </div>
-        </label>
-        <span className="text-xs font-mono text-accent-cyan px-2 py-0.5 rounded">{similarityThreshold}</span>
-      </div>
-
-      <div className="relative pt-1">
-        <input
-          type="range"
-          min="0"
-          max="20"
-          step="1"
-          value={similarityThreshold}
-          onChange={(e) => setSimilarityThreshold(parseInt(e.target.value, 10))}
-          className="w-full h-2 bg-white/5 rounded-lg appearance-none cursor-pointer slider-accent"
-        />
-        <div className="flex justify-between text-xs text-text-secondary mt-2 px-1">
-          <span>Strict (Exact)</span>
-          <span>Balanced</span>
-          <span>Loose</span>
+    <div className="card-glass rounded-2xl p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Sliders className="w-4 h-4 text-white/35" />
+          <label className="text-sm font-semibold text-white/70">
+            Similarity Threshold
+          </label>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-medium ${modeColor} transition-colors duration-300`}>
+            {modeLabel}
+          </span>
+          <span className="px-2.5 py-0.5 rounded-lg text-sm font-bold text-white/80 bg-white/[0.06] border border-white/[0.08] tabular-nums min-w-[32px] text-center"
+            style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            {similarityThreshold}
+          </span>
         </div>
       </div>
+
+      {/* Slider */}
+      <div className="relative">
+        {/* Track fill indicator */}
+        <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1 rounded-full bg-white/[0.04] pointer-events-none">
+          <div
+            className="h-full rounded-full transition-all duration-200"
+            style={{
+              width: `${pct}%`,
+              background: 'linear-gradient(90deg, #00d4ff, #7c3aed)'
+            }}
+          />
+        </div>
+        <input
+          type="range"
+          min="0" max="20" step="1"
+          value={similarityThreshold}
+          onChange={(e) => setSimilarityThreshold(parseInt(e.target.value, 10))}
+          className="w-full relative z-10"
+          aria-label="Similarity threshold"
+          aria-valuetext={`${similarityThreshold} — ${modeLabel}`}
+        />
+      </div>
+
+      {/* Labels */}
+      <div className="flex justify-between text-[10px] text-white/20 mt-2 font-medium uppercase tracking-wide">
+        <span>0 — Exact</span>
+        <span>10</span>
+        <span>20 — Loose</span>
+      </div>
     </div>
-  );
-};
+  )
+}
