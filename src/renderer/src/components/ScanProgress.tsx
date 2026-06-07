@@ -49,14 +49,14 @@ export function ScanProgress(): JSX.Element {
                   w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-500
                   ${done   ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : ''}
                   ${active ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400 shadow-[0_0_16px_rgba(0,212,255,0.3)]' : ''}
-                  ${!done && !active ? 'bg-white/[0.03] border-white/[0.08] text-white/20' : ''}
+                  ${!done && !active ? 'bg-surface-container border-outline-variant text-on-surface-variant/70' : ''}
                 `}>
                   {done
                     ? <CheckCircle2 className="w-4 h-4" />
                     : <Icon className={`w-4 h-4 ${active ? 'animate-spin' : ''}`} />}
                 </div>
                 <span className={`text-[10px] font-medium uppercase tracking-wider ${
-                  active ? 'text-cyan-400' : done ? 'text-emerald-400/70' : 'text-white/20'
+                  active ? 'text-cyan-400' : done ? 'text-emerald-400/70' : 'text-on-surface-variant/70'
                 }`}>{p.label}</span>
               </div>
 
@@ -112,8 +112,8 @@ export function ScanProgress(): JSX.Element {
             <span className="text-5xl font-bold gradient-text" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               {percent}
             </span>
-            <span className="text-lg text-white/40 font-light">%</span>
-            <span className="text-[11px] text-white/30 uppercase tracking-widest mt-1">
+            <span className="text-lg text-on-surface-variant font-light">%</span>
+            <span className="text-[11px] text-on-surface-variant uppercase tracking-widest mt-1">
               {phase}
             </span>
           </div>
@@ -140,7 +140,7 @@ export function ScanProgress(): JSX.Element {
           <div className="text-2xl font-bold text-white tabular-nums" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
             {current.toLocaleString()}
           </div>
-          <div className="text-[11px] text-white/35 mt-1">
+          <div className="text-[11px] text-on-surface-variant mt-1">
             of {total > 0 ? total.toLocaleString() : '…'} files
           </div>
         </div>
@@ -152,7 +152,7 @@ export function ScanProgress(): JSX.Element {
       </div>
 
       {/* ── Current file ── */}
-      <div className="flex items-center gap-2 text-[11px] text-white/25 max-w-sm w-full mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+      <div className="flex items-center gap-2 text-[11px] text-on-surface-variant max-w-sm w-full mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
         <Loader2 className="w-3 h-3 text-cyan-400/60 animate-spin flex-shrink-0" />
         <span className="truncate font-mono">{truncatePath(currentFile || '', 55) || 'Waiting…'}</span>
       </div>

@@ -47,29 +47,29 @@ function DropdownMenu<T extends string>({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.07] text-sm text-white/60 hover:text-white/80 hover:bg-white/[0.07] hover:border-white/[0.1] transition-all duration-200"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container border border-outline-variant text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-bright transition-all duration-200"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <Icon className="w-3.5 h-3.5 text-white/40" />
-        <span className="font-medium">{label}: <span className="text-cyan-400">{current?.label}</span></span>
-        <ChevronDown className={`w-3.5 h-3.5 text-white/30 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <Icon className="w-3.5 h-3.5 text-on-surface-variant" />
+        <span className="font-medium">{label}: <span className="text-primary">{current?.label}</span></span>
+        <ChevronDown className={`w-3.5 h-3.5 text-on-surface-variant transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 mt-1.5 w-44 card-glass rounded-xl shadow-elevated overflow-hidden z-20 animate-slide-down border border-white/[0.09]">
+        <div className="absolute top-full right-0 mt-1.5 w-44 glass-panel rounded-xl shadow-elevated overflow-hidden z-20 animate-slide-down border border-outline-variant">
           {options.map(opt => (
             <button
               key={opt.value}
               onClick={() => { onChange(opt.value); setOpen(false) }}
               className={`w-full px-4 py-2.5 text-sm text-left transition-colors flex items-center justify-between
                 ${opt.value === value
-                  ? 'text-cyan-400 bg-cyan-500/[0.07]'
-                  : 'text-white/55 hover:text-white/80 hover:bg-white/[0.04]'
+                  ? 'text-primary bg-primary/10'
+                  : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-bright/50'
                 }`}
             >
               {opt.label}
-              {opt.value === value && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+              {opt.value === value && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
             </button>
           ))}
         </div>
@@ -85,7 +85,7 @@ export const FilterBar: React.FC = () => {
     <div className="flex flex-wrap items-center gap-3">
       {/* Search */}
       <div className="relative flex-1 min-w-[180px] max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-on-surface-variant pointer-events-none" />
         <input
           type="text"
           value={searchQuery}

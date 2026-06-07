@@ -8,7 +8,7 @@
  * for file deletions.
  */
 
-import { ipcMain, dialog, BrowserWindow } from 'electron'
+import { ipcMain, dialog, BrowserWindow, shell } from 'electron'
 import { readFile } from 'node:fs/promises'
 import { scanDirectories } from './services/scanner'
 import { HasherService } from './services/hasher'
@@ -126,7 +126,8 @@ export function registerIPCHandlers(
             totalFilesScanned: 0,
             totalDuplicates: 0,
             totalSpaceSavings: 0,
-            scanDurationMs: Date.now() - startTime
+            scanDurationMs: Date.now() - startTime,
+            failedFiles: []
           }
           mainWindow.webContents.send(IPC_CHANNELS.SCAN_RESULTS, emptyResults)
           return emptyResults
@@ -230,18 +231,15 @@ export function registerIPCHandlers(
 
   /**
    * Cancels the currently running scan.
+   * Only calls abort() — the SCAN_START handler's finally block owns all cleanup
+   * (nulling scanAbortController, destroying the hasher). This prevents a race
+   * condition where a new scan could start before the old worker pool is torn down.
    */
-  ipcMain.handle(IPC_CHANNELS.SCAN_CANCEL, async () => {
+  ipcMain.handle(IPC_CHANNELS.SCAN_CANCEL, () => {
     if (scanAbortController) {
       scanAbortController.abort()
-      scanAbortController = null
-
-      // Also destroy the hasher if active
-      if (activeHasher) {
-        await activeHasher.destroy()
-        activeHasher = null
-      }
-
+      // Do NOT null scanAbortController here — SCAN_START's finally block does it
+      // after the worker pool is fully destroyed.
       return true
     }
     return false
@@ -391,7 +389,6 @@ export function registerIPCHandlers(
 
   // ---------- System Actions ----------
   ipcMain.handle('system:open-file', async (_event, filePath: string) => {
-    const { shell } = require('electron')
     await shell.openPath(filePath)
   })
 

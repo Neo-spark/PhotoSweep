@@ -180,8 +180,8 @@ const api = {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('preload.compareImages failed', err)
-      // Re-throw so renderer can handle the error specifically
-      throw err
+      // Return a rejected promise (consistent with all other preload methods)
+      return Promise.reject(err)
     }
   },
 

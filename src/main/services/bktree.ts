@@ -12,10 +12,14 @@ export const MAX_HAMMING_DISTANCE = 64
 export function hammingDistance(hashA: string, hashB: string): number {
   if (!hashA || !hashB) return MAX_HAMMING_DISTANCE
 
-  let distance = 0
-  const len = Math.min(hashA.length, hashB.length)
+  // Hashes must be the same length (16 hex chars for a 64-bit dHash).
+  // If they differ (e.g. corrupted cache entry), treat them as maximally different
+  // rather than silently truncating bits with Math.min, which would produce
+  // a falsely low distance and cause incorrect duplicate grouping.
+  if (hashA.length !== hashB.length) return MAX_HAMMING_DISTANCE
 
-  for (let i = 0; i < len; i++) {
+  let distance = 0
+  for (let i = 0; i < hashA.length; i++) {
     const a = parseInt(hashA[i], 16)
     const b = parseInt(hashB[i], 16)
     // XOR to find differing bits, then count them
@@ -81,10 +85,12 @@ export class BKTree {
     const results: string[] = []
     if (!this.root) return results
 
-    const queue: BKNode[] = [this.root]
+    // Use a stack (DFS) instead of a queue (BFS) — pop() is O(1) vs shift() O(n).
+    // For BKTree nearest-neighbour search, DFS and BFS yield identical result sets.
+    const stack: BKNode[] = [this.root]
 
-    while (queue.length > 0) {
-      const current = queue.shift()!
+    while (stack.length > 0) {
+      const current = stack.pop()!
       const distance = hammingDistance(current.hash, hash)
 
       if (distance <= threshold) {
@@ -96,7 +102,7 @@ export class BKTree {
 
       for (const [childDist, childNode] of current.children) {
         if (childDist >= minDistance && childDist <= maxDistance) {
-          queue.push(childNode)
+          stack.push(childNode)
         }
       }
     }

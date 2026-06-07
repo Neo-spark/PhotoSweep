@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 import { cn } from '../lib/utils'
 import {
@@ -7,12 +6,12 @@ import {
   BarChart3,
   GitCompare,
   Settings2,
-  ChevronLeft,
-  ChevronRight,
+  Bell,
+  HelpCircle,
+  Zap,
+  Layers,
   Sparkles,
-  HardDrive,
-  Images,
-  Zap
+  Search as SearchIcon
 } from 'lucide-react'
 import type { AppView } from '../lib/types'
 
@@ -20,73 +19,51 @@ interface NavItem {
   id: AppView
   icon: typeof FolderSearch
   label: string
-  description: string
 }
 
 const navItems: NavItem[] = [
-  { id: 'scan',     icon: FolderSearch, label: 'Scan',     description: 'Select & scan folders' },
-  { id: 'results',  icon: BarChart3,    label: 'Results',  description: 'View duplicates'        },
-  { id: 'compare',  icon: GitCompare,   label: 'Compare',  description: 'Side-by-side compare'   },
-  { id: 'settings', icon: Settings2,    label: 'Settings', description: 'Configure detection'    }
+  { id: 'scan',     icon: FolderSearch, label: 'Dashboard' },
+  { id: 'results',  icon: BarChart3,    label: 'Results'   },
+  { id: 'compare',  icon: GitCompare,   label: 'Compare'   },
+  { id: 'settings', icon: Settings2,    label: 'Settings'  }
 ]
 
 const viewTitles: Record<AppView, { label: string; icon: typeof FolderSearch }> = {
-  scan:     { label: 'Scan for Duplicates', icon: FolderSearch },
-  results:  { label: 'Duplicate Results',   icon: BarChart3    },
-  compare:  { label: 'Image Compare',       icon: GitCompare   },
-  settings: { label: 'Settings',            icon: Settings2    }
+  scan:     { label: 'Intelligent Scan',  icon: FolderSearch },
+  results:  { label: 'Duplicate Results', icon: BarChart3    },
+  compare:  { label: 'Image Compare',     icon: GitCompare   },
+  settings: { label: 'Settings',          icon: Settings2    }
 }
 
 interface LayoutProps { children: ReactNode }
 
 export function Layout({ children }: LayoutProps): JSX.Element {
-  const [collapsed, setCollapsed] = useState(false)
   const view      = useAppStore((s) => s.view)
   const setView   = useAppStore((s) => s.setView)
   const scanState = useAppStore((s) => s.scanState)
-  const stats     = useAppStore((s) => s.stats)
-
-  const W = collapsed ? 72 : 240
 
   const TitleIcon = viewTitles[view].icon
 
   return (
-    <div className="bg-bg-base text-on-surface min-h-screen font-sans overflow-hidden select-none">
+    // Outer shell: full-screen horizontal flex — sidebar + right panel sit side by side
+    <div className="flex h-screen overflow-hidden bg-background text-on-surface font-body select-none">
 
-      {/* ══ SIDEBAR ══════════════════════════════════════ */}
-      <aside
-        style={{ width: W }}
-        className={cn(
-          'fixed left-0 top-0 h-full z-40 flex flex-col transition-all duration-300 ease-out',
-          'gradient-sidebar border-r border-white/[0.06] shadow-sidebar'
-        )}
-      >
+      {/* ══ SIDEBAR — flex child, not fixed, never overlaps ══ */}
+      <aside className="flex-shrink-0 flex flex-col w-64 h-screen py-6 px-4 border-r border-primary/10 bg-surface/60 backdrop-blur-xl shadow-[0_0_30px_rgba(125,211,252,0.05)]">
+
         {/* Logo */}
-        <div className="relative px-4 py-5 flex items-center gap-3 overflow-hidden">
-          {/* Glow behind logo */}
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-violet-600/10 via-cyan-500/5 to-transparent pointer-events-none" />
-
-          <div className="relative z-10 flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#00d4ff)' }}>
-            <Sparkles className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-3 px-2 mb-10 drag-region">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center glacier-glow border border-primary/30">
+            <Layers className="w-5 h-5 text-primary" strokeWidth={2.5} />
           </div>
-
-          {!collapsed && (
-            <div className="relative z-10 overflow-hidden">
-              <h1 className="text-base font-bold gradient-text-violet leading-tight">
-                PhotoSweep
-              </h1>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-white/30 font-medium">
-                AI Pro Edition
-              </span>
-            </div>
-          )}
+          <div className="overflow-hidden">
+            <h1 className="text-xl font-headline font-semibold tracking-tight text-primary">PhotoSweep</h1>
+            <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">AI Image Engine</p>
+          </div>
         </div>
 
-        <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent mb-3" />
-
         {/* Nav */}
-        <nav role="navigation" aria-label="Main navigation" className="flex-1 flex flex-col gap-0.5 px-2">
+        <nav role="navigation" className="flex-1 space-y-1 no-drag">
           {navItems.map((item) => {
             const isActive = view === item.id
             const Icon = item.icon
@@ -94,177 +71,101 @@ export function Layout({ children }: LayoutProps): JSX.Element {
               <button
                 key={item.id}
                 onClick={() => setView(item.id)}
-                aria-current={isActive ? 'page' : undefined}
-                aria-label={item.description}
-                title={collapsed ? item.label : undefined}
                 className={cn(
-                  'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left',
-                  'transition-all duration-200 ease-out',
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors duration-200 active:scale-95 text-left',
                   isActive
-                    ? 'bg-white/[0.07] nav-active-glow text-white'
-                    : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                    ? 'text-primary bg-primary/10'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-primary/5'
                 )}
               >
-                {/* Active indicator */}
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-gradient-to-b from-cyan-400 to-violet-500" />
-                )}
-
-                <Icon className={cn(
-                  'w-[18px] h-[18px] flex-shrink-0 transition-colors',
-                  isActive ? 'text-cyan-400' : 'text-inherit'
-                )} />
-
-                {!collapsed && (
-                  <div className="flex-1 min-w-0">
-                    <div className={cn(
-                      'text-sm font-medium leading-none',
-                      isActive ? 'text-white' : 'text-white/60'
-                    )}>
-                      {item.label}
-                    </div>
-                  </div>
-                )}
-
-                {/* Active dot when collapsed */}
-                {isActive && collapsed && (
-                  <div className="absolute right-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#00d4ff]" />
-                )}
+                <Icon className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+                <span>{item.label}</span>
               </button>
             )
           })}
         </nav>
 
         {/* Bottom section */}
-        <div className="px-3 pb-4 mt-auto space-y-2">
-          {/* Mini stats (when not collapsed) */}
-          {!collapsed && stats.totalImages > 0 && (
-            <div className="card-glass p-3 space-y-2">
-              <div className="flex items-center justify-between text-[11px]">
-                <div className="flex items-center gap-1.5 text-white/40">
-                  <Images className="w-3 h-3" />
-                  <span>Scanned</span>
-                </div>
-                <span className="text-white/70 font-semibold tabular-nums">
-                  {stats.totalImages.toLocaleString()}
-                </span>
-              </div>
-              {stats.duplicateSize > 0 && (
-                <div className="flex items-center justify-between text-[11px]">
-                  <div className="flex items-center gap-1.5 text-white/40">
-                    <HardDrive className="w-3 h-3" />
-                    <span>Recoverable</span>
-                  </div>
-                  <span className="text-cyan-400 font-semibold">
-                    {stats.duplicateSize > 1073741824
-                      ? `${(stats.duplicateSize / 1073741824).toFixed(1)} GB`
-                      : `${(stats.duplicateSize / 1048576).toFixed(0)} MB`}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Scan state */}
-          {scanState === 'scanning' && (
-            <div className={cn(
-              'flex items-center gap-2 px-3 py-2.5 rounded-xl',
-              'bg-cyan-500/10 border border-cyan-500/20',
-              !collapsed && 'animate-pulse'
-            )}>
-              <Zap className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0 animate-spin-slow" />
-              {!collapsed && (
-                <span className="text-xs font-medium text-cyan-400">Scanning…</span>
-              )}
-            </div>
-          )}
-
-          {/* Collapse button */}
+        <div className="mt-auto pt-6 border-t border-primary/10 no-drag">
           <button
-            onClick={() => setCollapsed(s => !s)}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="w-full flex items-center justify-center py-2 rounded-xl text-white/25 hover:text-white/60 hover:bg-white/[0.04] transition-all duration-200"
+            className="w-full py-3 px-4 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group active:scale-95"
+            onClick={() => setView('scan')}
           >
-            {collapsed
-              ? <ChevronRight className="w-4 h-4" />
-              : <ChevronLeft className="w-4 h-4" />}
+            <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+            <span>Clean Now</span>
           </button>
+
+          <div className="mt-6 flex items-center gap-3 px-2">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full border border-primary/20 bg-surface-container flex items-center justify-center overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-tertiary/20 flex items-center justify-center text-xs font-bold text-primary">
+                AR
+              </div>
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-sm font-medium truncate">Alex Rivers</p>
+              <p className="text-xs text-on-surface-variant truncate">Pro Edition</p>
+            </div>
+          </div>
         </div>
       </aside>
 
-      {/* ══ TOP HEADER ════════════════════════════════════ */}
-      <header
-        style={{ left: W, width: `calc(100% - ${W}px)` }}
-        className={cn(
-          'fixed top-0 right-0 h-14 z-30 flex items-center justify-between px-6',
-          'bg-bg-secondary/70 backdrop-blur-2xl border-b border-white/[0.06]',
-          'transition-all duration-300 ease-out drag-region'
-        )}
-      >
-        {/* Left: title */}
-        <div className="flex items-center gap-2.5 no-drag">
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.08]">
-            <TitleIcon className="w-3.5 h-3.5 text-cyan-400" />
+      {/* ══ RIGHT PANEL — header + scrollable content, takes remaining width ══ */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        {/* Top bar — flex-shrink-0 so it never scrolls away */}
+        <header className="flex-shrink-0 flex items-center justify-between px-8 h-16 border-b border-primary/10 bg-surface-dim/60 backdrop-blur-2xl z-10 drag-region">
+          <div className="flex items-center gap-4 no-drag">
+            <TitleIcon className="w-5 h-5 text-primary" strokeWidth={2.5} />
+            <h2 className="text-lg font-bold text-primary font-headline">{viewTitles[view].label}</h2>
           </div>
-          <span className="text-sm font-semibold text-white/80 tracking-wide" aria-live="polite">
-            {viewTitles[view].label}
-          </span>
-        </div>
 
-        {/* Right: status chip */}
-        <div className="flex items-center gap-3 no-drag">
-          {scanState === 'complete' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-semibold text-emerald-400">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Scan Complete
+          <div className="flex items-center gap-6 no-drag">
+            {/* Search */}
+            <div className="relative hidden lg:block">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search gallery..."
+                className="bg-surface-container-low border border-primary/10 rounded-full py-1.5 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary/50 focus:border-primary/50 w-52 transition-all text-on-surface placeholder:text-on-surface-variant outline-none"
+              />
             </div>
-          )}
-          {scanState === 'scanning' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[11px] font-semibold text-cyan-400 animate-pulse">
-              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-              Scanning
-            </div>
-          )}
 
-          {/* Avatar */}
-          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#00d4ff)' }}>
-            PS
+            {/* Icon buttons */}
+            <div className="flex items-center gap-3">
+              <button className="relative text-on-surface-variant hover:text-primary transition-colors">
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full border-2 border-surface-dim" />
+              </button>
+              <button className="text-on-surface-variant hover:text-primary transition-colors">
+                <HelpCircle className="w-5 h-5" />
+              </button>
+
+              {/* Start Scan CTA */}
+              <button
+                className="bg-primary text-on-primary px-5 py-1.5 rounded-full text-sm font-bold hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
+                onClick={() => {
+                  const s = useAppStore.getState()
+                  if (s.scanState === 'idle') s.startScan()
+                }}
+              >
+                {scanState === 'scanning' ? (
+                  <>
+                    <Zap className="w-4 h-4 animate-spin-slow" />
+                    Scanning...
+                  </>
+                ) : (
+                  'Start Scan'
+                )}
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* ══ MAIN CANVAS ═══════════════════════════════════ */}
-      <main
-        style={{ marginLeft: W }}
-        className="mt-14 h-[calc(100vh-56px)] flex flex-col relative overflow-hidden transition-all duration-300 ease-out"
-      >
-        {/* Atmospheric background orbs */}
-        <div className="fixed pointer-events-none -z-10">
-          <div
-            className="absolute rounded-full blur-[140px] opacity-40"
-            style={{
-              width: 500, height: 500,
-              top: '-15%', right: '-8%',
-              background: 'radial-gradient(circle, rgba(0,212,255,0.12) 0%, rgba(124,58,237,0.06) 60%, transparent 100%)',
-              animation: 'orb-drift 14s ease-in-out infinite'
-            }}
-          />
-          <div
-            className="absolute rounded-full blur-[120px] opacity-30"
-            style={{
-              width: 400, height: 400,
-              bottom: '-10%', left: '3%',
-              background: 'radial-gradient(circle, rgba(124,58,237,0.14) 0%, rgba(0,212,255,0.05) 60%, transparent 100%)',
-              animation: 'orb-drift 18s ease-in-out infinite reverse'
-            }}
-          />
-        </div>
-
-        <div className="flex-1 overflow-hidden animate-fade-in flex flex-col relative z-0">
+        {/* Page content — scrolls independently */}
+        <main className="flex-1 overflow-y-auto">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

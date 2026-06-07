@@ -1,75 +1,52 @@
 import React from 'react'
 import { useAppStore } from '../store/useAppStore'
-import { Sliders } from 'lucide-react'
+import { SlidersHorizontal } from 'lucide-react'
+import { cn } from '../lib/utils'
 
 export const ThresholdSlider: React.FC = () => {
   const { similarityThreshold, setSimilarityThreshold } = useAppStore()
 
-  const pct = (similarityThreshold / 20) * 100
+  const getModeDetails = (val: number) => {
+    if (val === 0) return { label: 'Exact duplicates only', colorClass: 'bg-primary/10 text-primary' }
+    if (val <= 4)  return { label: 'High precision', colorClass: 'bg-primary/10 text-primary' }
+    if (val <= 9)  return { label: 'Balanced (recommended)', colorClass: 'bg-primary/10 text-primary' }
+    if (val <= 14) return { label: 'Moderate — catches more', colorClass: 'bg-secondary/10 text-secondary' }
+    return { label: 'Loose — may catch non-duplicates', colorClass: 'bg-error/10 text-error' }
+  }
 
-  const modeLabel =
-    similarityThreshold === 0  ? 'Exact duplicates only'         :
-    similarityThreshold <= 4   ? 'High precision'                :
-    similarityThreshold <= 9   ? 'Balanced (recommended)'        :
-    similarityThreshold <= 14  ? 'Moderate — catches more'       :
-    'Loose — may catch non-duplicates'
-
-  const modeColor =
-    similarityThreshold === 0  ? 'text-emerald-400' :
-    similarityThreshold <= 4   ? 'text-cyan-400'    :
-    similarityThreshold <= 9   ? 'text-violet-400'  :
-    similarityThreshold <= 14  ? 'text-amber-400'   :
-    'text-rose-400'
+  const { label, colorClass } = getModeDetails(similarityThreshold)
 
   return (
-    <div className="card-glass rounded-2xl p-5">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-white/35" />
-          <label className="text-sm font-semibold text-white/70">
-            Similarity Threshold
-          </label>
+          <SlidersHorizontal className="text-primary w-5 h-5" strokeWidth={2.5} />
+          <span className="font-medium text-on-surface">Similarity Threshold</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`text-xs font-medium ${modeColor} transition-colors duration-300`}>
-            {modeLabel}
+          <span className={cn("text-xs px-2 py-1 rounded-full font-bold", colorClass)}>
+            {label}
           </span>
-          <span className="px-2.5 py-0.5 rounded-lg text-sm font-bold text-white/80 bg-white/[0.06] border border-white/[0.08] tabular-nums min-w-[32px] text-center"
+          <span className="px-2 py-1 rounded-md text-sm font-bold text-on-surface bg-surface-container border border-outline-variant tabular-nums min-w-[32px] text-center"
             style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
             {similarityThreshold}
           </span>
         </div>
       </div>
-
-      {/* Slider */}
-      <div className="relative">
-        {/* Track fill indicator */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1 rounded-full bg-white/[0.04] pointer-events-none">
-          <div
-            className="h-full rounded-full transition-all duration-200"
-            style={{
-              width: `${pct}%`,
-              background: 'linear-gradient(90deg, #00d4ff, #7c3aed)'
-            }}
-          />
-        </div>
-        <input
-          type="range"
-          min="0" max="20" step="1"
+      <div className="px-2">
+        <input 
+          className="w-full appearance-none bg-transparent custom-slider" 
+          max="20" 
+          min="0" 
+          type="range" 
           value={similarityThreshold}
           onChange={(e) => setSimilarityThreshold(parseInt(e.target.value, 10))}
-          className="w-full relative z-10"
           aria-label="Similarity threshold"
-          aria-valuetext={`${similarityThreshold} — ${modeLabel}`}
         />
-      </div>
-
-      {/* Labels */}
-      <div className="flex justify-between text-[10px] text-white/20 mt-2 font-medium uppercase tracking-wide">
-        <span>0 — Exact</span>
-        <span>10</span>
-        <span>20 — Loose</span>
+        <div className="flex justify-between mt-3 text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">
+          <span>0 — Exact</span>
+          <span className="ml-auto">20 — Loose</span>
+        </div>
       </div>
     </div>
   )

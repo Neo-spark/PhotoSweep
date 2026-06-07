@@ -43,7 +43,7 @@ export function DuplicateCard({ group, index }: DuplicateCardProps): JSX.Element
     <div
       className={cn(
         'card-glass overflow-hidden card-lift transition-all duration-250',
-        'border border-white/[0.07] hover:border-white/[0.11]',
+        'border border-outline-variant hover:border-outline',
         isExact
           ? 'border-l-[2px] border-l-emerald-500/40'
           : 'border-l-[2px] border-l-amber-500/40'
@@ -59,10 +59,10 @@ export function DuplicateCard({ group, index }: DuplicateCardProps): JSX.Element
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsExpanded(!isExpanded) }
         }}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/[0.02] transition-colors"
+        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-bright/30 transition-colors"
       >
         {/* Chevron */}
-        <div className="flex-shrink-0 text-white/25">
+        <div className="flex-shrink-0 text-on-surface-variant">
           {isExpanded
             ? <ChevronDown className="w-4 h-4" />
             : <ChevronRight className="w-4 h-4" />}
@@ -81,7 +81,7 @@ export function DuplicateCard({ group, index }: DuplicateCardProps): JSX.Element
         )}
 
         {/* Image count */}
-        <span className="text-xs text-white/30 flex-shrink-0">
+        <span className="text-xs text-on-surface-variant flex-shrink-0">
           {group.images.length} images
         </span>
 

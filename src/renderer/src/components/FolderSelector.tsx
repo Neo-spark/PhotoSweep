@@ -6,11 +6,11 @@ import { cn, truncatePath } from '../lib/utils'
 import {
   FolderOpen,
   X,
-  Play,
   Sparkles,
-  ImagePlus,
-  Shield,
-  Zap
+  ShieldCheck,
+  Zap,
+  Images,
+  Rocket
 } from 'lucide-react'
 
 export function FolderSelector(): JSX.Element {
@@ -60,180 +60,129 @@ export function FolderSelector(): JSX.Element {
   const canScan = folders.length > 0
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-8 py-8 animate-fade-in overflow-y-auto">
-      {/* ── Hero ── */}
-      <div className="text-center mb-8 animate-slide-up">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-semibold text-violet-400 mb-5">
-          <Sparkles className="w-3 h-3" />
-          AI-Powered Detection
+    <div className="overflow-y-auto h-full">
+      <div className="flex flex-col items-center justify-center p-8 relative min-h-full">
+      {/* Background Atmospheric Element */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <div className="max-w-4xl w-full flex flex-col items-center text-center relative z-10 py-8">
+        {/* Header Section */}
+        <div className="mb-10 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide uppercase">
+            <Sparkles className="w-3.5 h-3.5" />
+            Intelligent Detection Engine
+          </div>
+          <h2 className="text-5xl font-headline font-extrabold tracking-tight text-on-surface">
+            Find and clean up <span className="text-primary">duplicate photos</span>
+          </h2>
+          <p className="text-on-surface-variant text-lg max-w-xl mx-auto">
+            Select folders to scan for exact copies and visually similar images. Reclaim your disk space quickly and safely.
+          </p>
+          <div className="flex justify-center gap-6 pt-4">
+            <div className="flex items-center gap-2 text-on-surface-variant text-sm">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span>Safe deletion</span>
+            </div>
+            <div className="flex items-center gap-2 text-on-surface-variant text-sm">
+              <Zap className="w-4 h-4 text-primary" />
+              <span>Fast scanning</span>
+            </div>
+            <div className="flex items-center gap-2 text-on-surface-variant text-sm">
+              <Images className="w-4 h-4 text-primary" />
+              <span>All formats</span>
+            </div>
+          </div>
         </div>
-        <h2 className="text-4xl font-bold gradient-text mb-3 leading-tight">
-          Find &amp; Destroy<br />Duplicate Photos
-        </h2>
-        <p className="text-text-secondary text-sm max-w-md mx-auto leading-relaxed">
-          Select folders to scan for exact copies and visually similar images.
-          Reclaim your disk space with perceptual hashing technology.
-        </p>
-      </div>
 
-      {/* ── Feature pills ── */}
-      <div className="flex items-center gap-3 mb-8 animate-slide-up" style={{ animationDelay: '0.05s' }}>
-        {[
-          { icon: Shield,    label: 'Safe deletion' },
-          { icon: Zap,       label: 'Blazing fast'  },
-          { icon: ImagePlus, label: 'All formats'   }
-        ].map(({ icon: Icon, label }) => (
-          <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.07] text-xs text-white/50">
-            <Icon className="w-3 h-3 text-cyan-400" />
-            {label}
+        {/* Drag & Drop Zone */}
+        <div
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleBrowse() }
+          }}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={handleBrowse}
+          className={cn(
+            "w-full max-w-2xl glass-panel-elevated rounded-[2rem] p-12 glacier-glow border-dashed border-2 transition-all duration-300 cursor-pointer group mb-8 relative overflow-hidden",
+            isDragging ? "border-primary bg-primary/5 scale-[1.02]" : "border-primary/20 hover:border-primary/50"
+          )}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+          <div className="relative z-10 flex flex-col items-center pointer-events-none">
+            <div className="w-24 h-24 rounded-3xl bg-surface-bright flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+              <FolderOpen className={cn("w-12 h-12 transition-colors", isDragging ? "text-primary" : "text-primary/80 group-hover:text-primary")} strokeWidth={1.5} />
+            </div>
+            <h3 className="text-2xl font-semibold mb-2 text-on-surface">
+              {isDragging ? 'Drop folders here' : 'Drag & drop folders'}
+            </h3>
+            <p className="text-on-surface-variant">
+              or <span className="text-primary hover:underline font-medium pointer-events-auto">browse your computer</span>
+            </p>
+            <div className="mt-8 flex gap-2 flex-wrap justify-center">
+              {['JPG', 'PNG', 'WEBP', 'HEIC', 'TIFF', 'BMP', 'GIF'].map(ext => (
+                <span key={ext} className="px-2 py-1 bg-surface-container rounded text-[10px] text-on-surface-variant border border-outline-variant">{ext}</span>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* ── Drop Zone ── */}
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="Add folders to scan"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleBrowse() }
-        }}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleBrowse}
-        className={cn(
-          'dropzone-animated w-full max-w-xl relative cursor-pointer overflow-hidden',
-          'transition-all duration-400 ease-out rounded-3xl group',
-          isDragging
-            ? 'bg-cyan-500/[0.07] scale-[1.015] drag-active'
-            : 'bg-white/[0.025] hover:bg-white/[0.04]'
-        )}
-        style={{ animationDelay: '0.1s' }}
-      >
-        {/* Inner glow on hover */}
-        <div className={cn(
-          'absolute inset-0 rounded-3xl transition-opacity duration-500',
-          'bg-gradient-to-br from-cyan-500/5 via-violet-500/3 to-transparent',
-          isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        )} />
-
-        <div className="relative z-10 flex flex-col items-center justify-center py-14 px-8 text-center">
-          {/* Icon container */}
-          <div className={cn(
-            'w-20 h-20 rounded-2xl flex items-center justify-center mb-5',
-            'transition-all duration-500',
-            isDragging
-              ? 'bg-cyan-500/20 shadow-glow-cyan scale-110'
-              : 'bg-white/[0.04] border border-white/[0.07] group-hover:bg-cyan-500/10 group-hover:scale-105'
-          )}>
-            {isDragging
-              ? <ImagePlus className="w-10 h-10 text-cyan-400 animate-bounce" />
-              : <FolderOpen className="w-10 h-10 text-white/30 group-hover:text-cyan-400 transition-colors duration-300" />}
-          </div>
-
-          <p className="text-xl font-semibold text-white/80 mb-1.5">
-            {isDragging ? 'Drop folders here' : 'Drag & drop folders'}
-          </p>
-          <p className="text-sm text-white/35">
-            or{' '}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleBrowse() }}
-              className="text-cyan-400 hover:text-cyan-300 font-medium underline-offset-2 hover:underline transition-colors no-drag"
-              aria-label="Browse folders"
-            >
-              browse your computer
-            </button>
-          </p>
-          <p className="text-[10px] uppercase tracking-widest text-white/20 mt-4 font-medium">
-            JPG · PNG · WEBP · HEIC · TIFF · BMP · GIF
-          </p>
         </div>
-      </div>
 
-      {/* ── Selected Folders ── */}
-      {folders.length > 0 && (
-        <div className="w-full max-w-xl mt-5 animate-slide-up" style={{ animationDelay: '0.12s' }}>
-          <div className="flex items-center justify-between mb-2.5">
-            <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">
-              {folders.length} folder{folders.length !== 1 ? 's' : ''} selected
-            </span>
-            <button
-              onClick={clearFolders}
-              className="btn btn-sm btn-ghost text-[11px]"
-              aria-label="Clear all folders"
-            >
-              Clear all
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {folders.map((folder) => (
-              <div key={folder} className="group flex items-center gap-1.5">
-                <div className="folder-pill">
-                  <FolderOpen className="w-3 h-3 text-cyan-400 flex-shrink-0" />
-                  <span className="truncate max-w-[220px] text-[11px]" title={folder}>
+        {/* Selected Folders */}
+        {folders.length > 0 && (
+          <div className="w-full max-w-2xl mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-left">
+            <div className="flex items-center justify-between mb-3 px-2">
+              <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                {folders.length} folder{folders.length !== 1 ? 's' : ''} selected
+              </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); clearFolders(); }}
+                className="text-[11px] text-error hover:text-error/80 font-medium"
+              >
+                Clear all
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {folders.map((folder) => (
+                <div key={folder} className="group flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg border border-outline-variant">
+                  <FolderOpen className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                  <span className="truncate max-w-[220px] text-xs text-on-surface" title={folder}>
                     {truncatePath(folder, 38)}
                   </span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeFolder(folder); }}
+                    className="ml-1 w-4 h-4 flex items-center justify-center rounded-full hover:bg-error/20 text-on-surface-variant hover:text-error transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => removeFolder(folder)}
-                  className="w-5 h-5 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20 hover:border-red-500/30"
-                  aria-label={`Remove ${folder}`}
-                >
-                  <X className="w-2.5 h-2.5 text-white/60" />
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+        )}
+
+        {/* Controls Section */}
+        <div className="w-full max-w-2xl glass-panel rounded-2xl p-6 flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          
+          <ThresholdSlider />
+
+          <button
+            onClick={handleStartScan}
+            disabled={!canScan}
+            className={cn(
+              "w-full h-14 font-bold text-lg rounded-xl flex items-center justify-center gap-3 transition-all active:scale-95 group overflow-hidden relative",
+              canScan 
+                ? "bg-primary text-on-primary hover:shadow-[0_0_40px_rgba(125,211,252,0.3)] hover:scale-[1.01] cursor-pointer" 
+                : "bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-50"
+            )}
+          >
+            {canScan && <span className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></span>}
+            <Rocket className={cn("w-5 h-5", canScan && "group-hover:rotate-12 transition-transform")} />
+            Start Scan
+          </button>
         </div>
-      )}
-
-      {/* ── Similarity Slider ── */}
-      <div className="w-full max-w-xl mt-5 animate-slide-up" style={{ animationDelay: '0.16s' }}>
-        <ThresholdSlider />
       </div>
-
-      {/* ── Scan Button ── */}
-      <div className="w-full max-w-xl mt-5 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        <button
-          onClick={handleStartScan}
-          disabled={!canScan}
-          aria-label="Start scan"
-          title={!canScan ? 'Select at least one folder first' : 'Start AI scan'}
-          className={cn(
-            'relative w-full overflow-hidden rounded-2xl py-4 font-bold text-white text-lg',
-            'transition-all duration-300',
-            canScan
-              ? 'cursor-pointer shadow-glow-violet hover:shadow-[0_0_40px_rgba(124,58,237,0.5),0_0_80px_rgba(0,212,255,0.15)] hover:-translate-y-0.5'
-              : 'cursor-not-allowed opacity-40'
-          )}
-          style={{
-            background: canScan
-              ? 'linear-gradient(135deg, #7c3aed 0%, #00d4ff 100%)'
-              : 'linear-gradient(135deg, #4b5563 0%, #374151 100%)'
-          }}
-        >
-          {/* Shimmer overlay */}
-          {canScan && (
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%)',
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 2.5s ease-in-out infinite'
-              }}
-            />
-          )}
-
-          <div className="relative z-10 flex items-center justify-center gap-3">
-            <Play className="w-5 h-5" />
-            <span>Start AI Scan</span>
-          </div>
-          <div className="relative z-10 text-[11px] text-white/50 font-normal mt-0.5">
-            Perceptual hashing · Exact &amp; visual duplicates
-          </div>
-        </button>
       </div>
     </div>
   )

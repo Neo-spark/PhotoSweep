@@ -82,24 +82,45 @@ export function groupDuplicates(
     (img) => img.phash && !assignedToExactGroup.has(img.filePath)
   )
 
+  // Build a map from pHash → all files sharing that hash.
+  // This is critical: BKTree.add() deduplicates by hash value (distance=0 → skip),
+  // so if we only stored one file per hash we would silently lose the others.
+  const phashToFiles = new Map<string, HashedImage[]>()
+  for (const img of candidates) {
+    const existing = phashToFiles.get(img.phash)
+    if (existing) {
+      existing.push(img)
+    } else {
+      phashToFiles.set(img.phash, [img])
+    }
+  }
+
+  // Add one representative per unique pHash to the BKTree
   const tree = new BKTree()
-  for (const c of candidates) {
-    tree.add(c.phash)
+  for (const hash of phashToFiles.keys()) {
+    tree.add(hash)
   }
 
   const assignedToSimilarGroup = new Set<string>()
   const similarGroups: HashedImage[][] = []
 
-  for (let i = 0; i < candidates.length; i++) {
-    const current = candidates[i]
-    if (assignedToSimilarGroup.has(current.filePath)) continue
+  for (const [currentHash, currentFiles] of phashToFiles) {
+    // Skip if all files for this hash are already assigned
+    if (currentFiles.every((f) => assignedToSimilarGroup.has(f.filePath))) continue
 
-    const similarHashes = tree.search(current.phash, similarityThreshold)
+    const similarHashes = tree.search(currentHash, similarityThreshold)
     const similarSet = new Set(similarHashes)
 
-    const group = candidates.filter(
-      (c) => similarSet.has(c.phash) && !assignedToSimilarGroup.has(c.filePath)
-    )
+    // Collect all files whose pHash is within the threshold
+    const group: HashedImage[] = []
+    for (const hash of similarSet) {
+      const filesForHash = phashToFiles.get(hash) ?? []
+      for (const file of filesForHash) {
+        if (!assignedToSimilarGroup.has(file.filePath)) {
+          group.push(file)
+        }
+      }
+    }
 
     if (group.length >= 2) {
       similarGroups.push(group)
